@@ -1,0 +1,17 @@
+***INSTRUCTIONS***
+One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. 
+In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants.
+
+
+***Background***
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. 
+These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, 
+to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, 
+but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants.
+
+
+Obviously the work assigned to uis is of trying to closely estimate the rouitine of the participants as they did their respective exercises which accordingly were recorded 
+in their wearable device.
+Starting by cleaning the data and getting rid of unnecessary columns within the data sheet we start by permorming a Cross-Validation of 5 folds to help get the parameters 
+in tune to help start practising on the training data. later on Test data split from the Training data and last but not the least with about 95% accuracy we were able to 
+give a good approximation.
