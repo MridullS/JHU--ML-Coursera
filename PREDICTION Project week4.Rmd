@@ -1,0 +1,145 @@
+---
+title: "Exercise Classe from Wearable Device"
+author: "Mridull Saraff"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,cache = TRUE)
+```
+
+##---Basic Explanation---
+This is an R Markdown document where we use devices like FitBit FuelBone etc to help collect large amounts of data about personal activity from specific groups who meticulously tracked there workout hous aoal of your project is to predict the manner in which they did the exercise. The variable is named as "classe" variable within the training set.
+##---Loading the Libraries---
+```{r LibsLoading}
+library(randomForest)
+library(caret)
+```
+
+##---Checking for the data and corresponding tables and loading them into the local computer for analysis. These links were presented in  the question problem and is accordingly used---
+----Loading Training Data from the URL----
+```{r Train_DataLoading, warning=FALSE}
+TrDATA <- read.csv('https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv' , header=T) 
+dim(TrDATA)
+TrDATA
+```
+
+```{r structure summary}
+str(TrDATA)
+```
+
+```{r counting dimensions of table }
+ncol(TrDATA)
+nrow(TrDATA)
+```
+
+```{r counting NA's in the columns}
+colSums(is.na(TrDATA))
+```
+
+#---Removing the columns  which contain only NA's and needs to be eliminated---
+```{r}
+TrDATA <- TrDATA[, !colSums(is.na(TrDATA)) == 19216]
+TrDATA
+```
+
+#--- removing useless columns which will not really affect the result via prediction FOR PRACTICE DATA---
+```{r removing useless columns which will not really affect the result via prediction}
+TrDATACleaned <- TrDATA[, 6:ncol(TrDATA)]
+dim(TrDATACleaned)
+```
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+#---Loading Test Data from the URL---
+```{r Test_DataLoading}
+TeDATA <- read.csv('https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv' , header=T) 
+dim(TeDATA)
+TeDATA
+```
+
+```{r counting NA's in the columns}
+colSums(is.na(TeDATA))
+```
+
+#---Removing the columns  which contain only NA's and needs to be eliminated---
+```{r}
+TeDATA <- TeDATA[, !colSums(is.na(TeDATA)) == 20]
+TeDATA
+```
+
+
+### ---removing useless columns which will not really affect the result via prediction FOR TEST DATA---
+Now we try to remove the variables and corresponding tables which cannot really affect the exercise prediction analyses.It could be anything like column number, names, time stamps.
+```{r}
+TeDATACleaned <- TeDATA[, 6:ncol(TeDATA)]
+TeDATACleaned
+dim(TeDATACleaned)
+```
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+# We now try to separate the training data into two different subsets of 70% which would be used for practicing the variables and remaining 30% of the data would be used for testing the prediction accuracy and check for the code flow.
+```{r}
+set.seed(23954)
+TrDATAsplit <- createDataPartition(y = TrDATACleaned$classe, p = 0.0007, list = F)
+TrDATA70 <- TrDATACleaned[TrDATAsplit, ]
+TrDATA30 <- TrDATACleaned[-TrDATAsplit, ]
+```
+
+
+#We fit a predictive model for activity recognition using Random Forest algorithm because it automatically selects important variables and is robust to correlated covariates & outliers in general. We will use 5-fold cross validation when applying the algorithm.  
+
+```{r parameter cross validation}
+RForrControl <- trainControl(method="cv", 
+                             number=5,
+                             savePredictions = T, 
+                             classProbs = T) #cross validation for training. 
+```
+
+```{r}
+paraMETS <- expand.grid(mtry=c(5, 25, 50))
+```
+
+
+```{r rf training}
+#random forest fitting   ntree=250
+RForrModel <- train(classe ~., 
+                    data=TrDATA70, method="rf",
+                    trControl=RForrControl, tunegrid=paraMETS )
+RForrModel
+```
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+performance of the model is then put to evaluation on the previously split data i.e. TrDATA30-testing set/validation data.
+
+```{r}
+#the Random Forrest model details specified above is used on the TrDATA30-testing set
+RForrPredict <- predict(RForrModel, newdata = TrDATA30) 
+confusionMatrix(RForrPredict, testing$classe)$table
+#the Random Forrest model is then used to predict overall prediction.
+confusionMatrix(RForrPredict, testing$classe)$overall[1] 
+```
+The above Random Forrest model is showing results of upto 95% accuracy in analysing and infering the resluts from them.This is checked via 5-fold cross validation prepared as mentiioned above.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+Real Prediction analysis for the presented Test data-set
+----------------------------
+Here we perform the real testing on the test dataset by the same code used above where it was used on practice data to help fine tune the parametrs.
+```{r}
+FINAL <- predict(RForrModel, TeDATACleaned[, -length(names(TeDATACleaned))])
+FINAL
+```
